@@ -1,0 +1,23 @@
+﻿<Page x:Class="MvvmNavigation.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:MvvmNavigation"
+      xmlns:vms="using:MvvmNavigation.ViewModels"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+    <Page.DataContext>
+        <vms:MainViewModel />
+    </Page.DataContext>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <TextBlock Text="{Binding Title}"
+                   Margin="100"
+                   FontSize="50"
+                   HorizontalAlignment="Center" />
+        <Button Content="Go to Second Page"
+                Click="GoToSecondPageClick"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Center"
+                Margin="100" />
+    </Grid>
+</Page>
