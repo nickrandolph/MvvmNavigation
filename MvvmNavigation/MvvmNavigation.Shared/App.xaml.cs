@@ -4,7 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -25,15 +28,57 @@ namespace MvvmNavigation
     /// </summary>
     sealed partial class App : Application
     {
-        private NavigationRoutes Routes { get; } = new NavigationRoutes()
+        //   private NavigationRoutes Routes { get; } = new NavigationRoutes()
+        //.Register<MainViewModel, EventHandler>(
+        //            (vm, act) => vm.ViewModelDone += act,
+        //            (vm, act) => vm.ViewModelDone -= act,
+        //            (nav) => (s, e) => nav.Navigate<SecondViewModel>())
+        //.Register<SecondViewModel, EventHandler>(
+        //            (vm, act) => vm.ViewModelDone += act,
+        //            (vm, act) => vm.ViewModelDone -= act,
+        //            (nav) => (s, e) => nav.GoBack());
+
+        public INavigationEventService EventService { get; private set; }
+
+        private NavigationMessageRoutes MessageRoutes { get; } = new NavigationMessageRoutes()
+.RegisterNavigate<MainViewModel, CompletedMessage, SecondViewModel>()
+.RegisterGoBack<SecondViewModel, CloseMessage>()
+.Register<MainViewModel, CompletedWithStatusMessage<CompletionStates>>((vm, msg, nav) =>
+{
+    if (msg.Status == CompletionStates.One)
+    {
+        nav.Navigate<SecondViewModel>();
+    }
+    else
+    {
+        nav.Navigate<ThirdViewModel>();
+    }
+})
+.RegisterGoBack<CloseMessage>();
+        //.Register<MainViewModel, CompletedMessage>((vm, msg, nav) => nav.Navigate<SecondViewModel>())
+        //.Register<SecondViewModel, CloseMessage>((vm, msg, nav) => nav.GoBack());
+
+
+        private NavigationEvents Events { get; } = new NavigationEvents()
             .Register<MainViewModel, EventHandler>(
                         (vm, act) => vm.ViewModelDone += act,
                         (vm, act) => vm.ViewModelDone -= act,
-                        (nav) => (s, e) => nav.Navigate<SecondViewModel>())
+                        (nav) => (s, e) => nav.OnNext(s.Complete(CompletionStates.One))
+            )
+
+            .Register<MainViewModel, EventHandler>(
+                        (vm, act) => vm.ViewModelAlsoDone += act,
+                        (vm, act) => vm.ViewModelAlsoDone -= act,
+                        (nav) => (s, e) => nav.OnNext(s.Complete(CompletionStates.Two))
+            )
             .Register<SecondViewModel, EventHandler>(
                         (vm, act) => vm.ViewModelDone += act,
                         (vm, act) => vm.ViewModelDone -= act,
-                        (nav) => (s, e) => nav.GoBack());
+                        (nav) => (s, e) => nav.OnNext(s.Close()))
+            .Register<ThirdViewModel, EventHandler>(
+                        (vm, act) => vm.ViewModelDone += act,
+                        (vm, act) => vm.ViewModelDone -= act,
+                        (nav) => (s, e) => nav.OnNext(s.Close()));
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -70,9 +115,18 @@ namespace MvvmNavigation
                 rootFrame = new Frame();
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
-                var navService = new WindowsNavigationService(rootFrame, Routes)
-                    .RegisterForNavigation<MainPage, MainViewModel>()
-                    .RegisterForNavigation<SecondPage, SecondViewModel>();
+
+                //var navService = new WindowsNavigationService(rootFrame, Routes)
+                //    .RegisterForNavigation<MainPage, MainViewModel>()
+                //    .RegisterForNavigation<SecondPage, SecondViewModel>();
+
+                EventService = new WindowsNavigationEventService(rootFrame, Events, MessageRoutes)
+    .RegisterForNavigation<MainPage, MainViewModel>()
+    .RegisterForNavigation<SecondPage, SecondViewModel>()
+        .RegisterForNavigation<ThirdPage, ThirdViewModel>();
+
+
+
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
@@ -97,7 +151,8 @@ namespace MvvmNavigation
             }
         }
 
-       
+
+
 
         /// <summary>
         /// Invoked when Navigation to a certain page fails
@@ -178,7 +233,13 @@ namespace MvvmNavigation
         }
     }
 
-    public class WindowsNavigationService:INavigationService
+    public enum CompletionStates
+    {
+        One,
+        Two
+    }
+
+    public class WindowsNavigationService : INavigationService
     {
         private Frame NavigationFrame { get; }
         private NavigationRoutes Routes { get; }
@@ -217,7 +278,169 @@ namespace MvvmNavigation
             }
 
             PreviousPage = e.Content;
-            Routes.Wire(this,(PreviousPage as Page).DataContext);
+            Routes.Wire(this, (PreviousPage as Page).DataContext);
         }
+    }
+
+    public interface INavigationEventService
+    {
+        void RaiseNavigationMessage<TNavigationMessage>(TNavigationMessage navigationMessage) where TNavigationMessage:INavigationMessage;
+    }
+
+
+    public class WindowsNavigationEventService : INavigationService, INavigationEventService
+    {
+        private Frame NavigationFrame { get; }
+        private ISubject<INavigationMessage> Messages { get; } = new Subject<INavigationMessage>();
+        private NavigationEvents Events { get; }
+        private NavigationMessageRoutes Routes { get; }
+        public IDictionary<Type, Type> ViewModelToPageMap { get; } = new Dictionary<Type, Type>();
+
+
+
+        public WindowsNavigationEventService(
+            Frame navigationFrame,
+            NavigationEvents events,
+            NavigationMessageRoutes routes)
+        {
+            NavigationFrame = navigationFrame;
+            NavigationFrame.Navigated += OnNavigated;
+            Events = events;
+            Routes = routes;
+            Messages.Subscribe(HandleNavigationEvent);
+
+        }
+
+        public void RaiseNavigationMessage<TNavigationMessage>(TNavigationMessage navigationMessage) 
+            where TNavigationMessage : INavigationMessage
+            {
+            Messages.OnNext(navigationMessage);
+            }
+
+
+    private void HandleNavigationEvent(INavigationMessage obj)
+        {
+            var messageType = obj.GetType();
+            var senderType = obj.Sender?.GetType();
+
+            var route = (from r in Routes.Behaviours
+                         where r.Item1 == senderType &&
+                         (r.Item2 == messageType|| r.Item2.IsAssignableFrom(messageType))
+                         select r.Item3).FirstOrDefault();
+            route?.Invoke(obj.Sender, obj, this);
+
+            if (route == null)
+            {
+                route = (from r in Routes.Behaviours
+                             where r.Item1 == typeof(object) &&
+                             r.Item2 == messageType
+                             select r.Item3).FirstOrDefault();
+                route?.Invoke(obj.Sender, obj, this);
+            }
+
+            //if(obj is CompletedMessage completed)
+            //{
+            //    if(completed.Sender is MainViewModel)
+            //    {
+            //        await Navigate<SecondViewModel>();
+            //    }
+            //}
+            //if(obj is CloseMessage)
+            //{
+            //    await GoBack();
+            //}
+        }
+
+
+        public async Task GoBack()
+        {
+            NavigationFrame.GoBack();
+        }
+
+        public async Task Navigate<TViewModel>()
+        {
+            NavigationFrame.Navigate(ViewModelToPageMap[typeof(TViewModel)]);
+        }
+
+        public WindowsNavigationEventService RegisterForNavigation<TPage, TViewModel>() where TPage : Page
+        {
+            ViewModelToPageMap[typeof(TViewModel)] = typeof(TPage);
+            return this;
+        }
+
+        private object PreviousPage { get; set; }
+        private void OnNavigated(object sender, NavigationEventArgs e)
+        {
+            if (PreviousPage != null)
+            {
+                Events.Unwire((PreviousPage as Page).DataContext);
+                PreviousPage = null;
+            }
+
+            PreviousPage = e.Content;
+            Events.Wire(this.Messages, (PreviousPage as Page).DataContext);
+        }
+    }
+
+    public interface INavigationMessage
+    {
+        object Sender { get; }
+    }
+
+    public abstract class BaseMessage : INavigationMessage
+    {
+        public object Sender { get; set; }
+
+        protected BaseMessage(object sender)
+        {
+            Sender = sender;
+        }
+    }
+
+    public static class ObjectHelpers
+    {
+        public static INavigationMessage Complete(this object sender)
+        {
+            return new CompletedMessage(sender);
+        }
+        public static INavigationMessage Complete<TStatus>(this object sender, TStatus status)
+        {
+            return new CompletedWithStatusMessage<TStatus>(sender, status);
+        }
+        public static INavigationMessage Close(this object sender)
+        {
+            return new CloseMessage(sender);
+        }
+    }
+
+
+    public class CompletedMessage : BaseMessage
+    {
+        public CompletedMessage(object sender) : base(sender) { }
+
+    }
+
+    public class CompletedWithStatusMessage<TStatus> : BaseMessage
+    {
+        public TStatus Status { get; }
+        public CompletedWithStatusMessage(object sender, TStatus status) : base(sender)
+        {
+            Status = status;
+        }
+
+    }
+
+    public class StateMessage : CompletedWithStatusMessage<CompletionStates>
+    {
+        public StateMessage(object sender, CompletionStates status) : base(sender, status)
+        {
+        }
+    }
+
+
+    public class CloseMessage : BaseMessage
+    {
+        public CloseMessage(object sender) : base(sender) { }
+
     }
 }
