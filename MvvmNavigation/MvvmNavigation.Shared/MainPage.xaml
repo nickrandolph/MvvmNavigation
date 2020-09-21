@@ -2,11 +2,14 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:MvvmNavigation"
+      xmlns:localmessages="using:MvvmNavigation.Messages"
       xmlns:vms="using:MvvmNavigation.ViewModels"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
       xmlns:Interactions="using:Microsoft.Xaml.Interactions.Core"
+      xmlns:builditmessages="using:BuildIt.Navigation.Messages"
+      xmlns:builditbehaviors="using:BuildIt.Navigation.Behaviors"
       mc:Ignorable="d">
     <Page.DataContext>
         <vms:MainViewModel />
@@ -32,7 +35,7 @@
                 <Interactivity:Interaction.Behaviors>
                     <Interactions:EventTriggerBehavior EventName="Click"
                                                        SourceObject="{Binding ElementName=button2}">
-                        <local:NavigationMessageAction MessageType="local:CompletedMessage"/>
+                        <builditbehaviors:NavigationMessageAction MessageType="builditmessages:CompletedMessage"/>
                     </Interactions:EventTriggerBehavior>
                 </Interactivity:Interaction.Behaviors>
             </Button>
@@ -41,7 +44,7 @@
                 <Interactivity:Interaction.Behaviors>
                     <Interactions:EventTriggerBehavior EventName="Click"
                                                        SourceObject="{Binding ElementName=button3}">
-                        <local:NavigationMessageAction MessageType="local:StateMessage"
+                        <builditbehaviors:NavigationMessageAction MessageType="localmessages:StateMessage"
                                                        MessageParameter="Two"/>
                     </Interactions:EventTriggerBehavior>
                 </Interactivity:Interaction.Behaviors>

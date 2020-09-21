@@ -133,6 +133,14 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <ProjectReference Include="..\..\..\MvvmNavigation.ViewModels\MvvmNavigation.ViewModels.csproj">
+      <Project>{6085fbd0-2475-4b14-b7d3-4b348f9491bb}</Project>
+      <Name>MvvmNavigation.ViewModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\BuildIt.Navigation\BuildIt.Navigation.csproj">
+      <Project>{bc470167-1161-47d1-9b49-2be05d49a3a3}</Project>
+      <Name>BuildIt.Navigation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MvvmNavigation.Core\MvvmNavigation.Core.csproj">
       <Project>{42211dbc-427b-459c-9c79-6680cd96db1e}</Project>
       <Name>MvvmNavigation.Core</Name>
