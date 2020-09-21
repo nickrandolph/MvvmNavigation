@@ -17,9 +17,16 @@ namespace MvvmNavigation
     /// </summary>
     sealed partial class App : Application, INavigationApplication
     {
-
+        /// <summary>
+        /// This is required for the INavigationApplication implementation,
+        /// making it possible for the NavigationMessageAction to resolve 
+        /// the INavigationEventService so that it can raise messages
+        /// </summary>
         public INavigationEventService EventService { get; private set; }
 
+        /// <summary>
+        /// This is the mapping from messages to navigation actions
+        /// </summary>
         private NavigationMessageRoutes MessageRoutes { get; } = new NavigationMessageRoutes()
             .RegisterNavigate<MainViewModel, CompletedMessage, SecondViewModel>()
             .RegisterGoBack<SecondViewModel, CloseMessage>()
@@ -36,7 +43,9 @@ namespace MvvmNavigation
             })
             .RegisterGoBack<CloseMessage>();
 
-
+        /// <summary>
+        /// This maps events to messages
+        /// </summary>
         private NavigationEvents Events { get; } = new NavigationEvents()
             .Register<MainViewModel, EventHandler>(
                         (vm, act) => vm.ViewModelDone += act,
