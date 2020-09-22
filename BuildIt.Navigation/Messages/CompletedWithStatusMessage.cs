@@ -1,11 +1,14 @@
 ﻿namespace BuildIt.Navigation.Messages
 {
-    public class CompletedWithStatusMessage<TStatus> : BaseMessage
+    public class CompletedWithStatusMessage<TStatus> : BaseMessage, INavigationMessageWithParameter<TStatus>
     {
-        public TStatus Status { get; }
-        public CompletedWithStatusMessage(object sender, TStatus status) : base(sender)
+        public TStatus Parameter { get; set; }
+
+        public CompletedWithStatusMessage() : base() { }
+
+        public CompletedWithStatusMessage(object sender, TStatus parameter) : base(sender)
         {
-            Status = status;
+            Parameter =parameter;
         }
 
     }

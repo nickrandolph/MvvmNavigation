@@ -32,7 +32,7 @@ namespace MvvmNavigation
             .RegisterGoBack<SecondViewModel, CloseMessage>()
             .Register<MainViewModel, CompletedWithStatusMessage<CompletionStates>>((vm, msg, nav) =>
             {
-                if (msg.Status == CompletionStates.One)
+                if (msg.Parameter == CompletionStates.One)
                 {
                     nav.Navigate<SecondViewModel>();
                 }
@@ -48,22 +48,20 @@ namespace MvvmNavigation
         /// </summary>
         private NavigationEvents Events { get; } = new NavigationEvents()
             .Register<MainViewModel, EventHandler>(
-                        (vm, act) => vm.ViewModelDone += act,
-                        (vm, act) => vm.ViewModelDone -= act,
+                        (v, a) => v.ViewModelDone += a,
+                        (v, a) => v.ViewModelDone -= a,
                         (nav) => (s, e) => nav(s.Complete(CompletionStates.One))
             )
-            .Register<MainViewModel, EventHandler>(
-                        (vm, act) => vm.ViewModelAlsoDone += act,
-                        (vm, act) => vm.ViewModelAlsoDone -= act,
-                        (nav) => (s, e) => nav(s.Complete(CompletionStates.Two))
-            )
-            .Register<SecondViewModel, EventHandler>(
-                        (vm, act) => vm.ViewModelDone += act,
-                        (vm, act) => vm.ViewModelDone -= act,
-                        (nav) => (s, e) => nav(s.Close()))
+
+            .RegisterMessageWithParameter<MainViewModel, CompletedWithStatusMessage<CompletionStates>, CompletionStates>
+                ((v, a) => v.ViewModelAlsoDone += a, (v, a) => v.ViewModelAlsoDone -= a, CompletionStates.Two)
+            
+            .RegisterMessage<SecondViewModel, CloseMessage>
+                ((v,a) => v.ViewModelDone += a,(v,a) => v.ViewModelDone -= a)
+            
             .Register<ThirdViewModel, EventHandler>(
-                        (vm, act) => vm.ViewModelDone += act,
-                        (vm, act) => vm.ViewModelDone -= act,
+                        (v, a) => v.ViewModelDone += a,
+                        (v, a) => v.ViewModelDone -= a,
                         (nav) => (s, e) => nav(s.Close()));
 
         /// <summary>

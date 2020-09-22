@@ -9,6 +9,51 @@ namespace BuildIt.Navigation
     {
         private IList<Tuple<Type, IApplicationBehavior<Action<INavigationMessage>>>> Behaviors { get; } = new List<Tuple<Type, IApplicationBehavior<Action<INavigationMessage>>>>();
 
+        public NavigationEvents RegisterMessageWithParameter<TViewModel, TMessage, TParameter>(
+            Action<TViewModel, EventHandler> init,
+            Action<TViewModel, EventHandler> deinit,
+            TParameter parameter) 
+                    where TMessage : INavigationMessageWithParameter<TParameter>, new()
+        {
+            var actionFactory = new Func<Action<INavigationMessage>, EventHandler>(nav =>
+            {
+                return new EventHandler((s, e) =>
+                {
+                    var msg = new TMessage();
+                    msg.Sender = s;
+                    msg.Parameter = parameter;
+                    nav(msg);
+                });
+            });
+
+            Behaviors.Add(
+                new Tuple<Type, IApplicationBehavior<Action<INavigationMessage>>>(
+                    typeof(TViewModel),
+                    Behavior<Action<INavigationMessage>, TViewModel, EventHandler>.Create(init, deinit, actionFactory)));
+            return this;
+        }
+
+        public NavigationEvents RegisterMessage<TViewModel, TMessage>(
+            Action<TViewModel, EventHandler> init,
+            Action<TViewModel, EventHandler> deinit) where TMessage : INavigationMessage, new()
+        {
+            var actionFactory = new Func<Action<INavigationMessage>, EventHandler>(nav =>
+            {
+                return new EventHandler((s, e) =>
+                {
+                    var msg = new TMessage();
+                    msg.Sender = s;
+                    nav(msg);
+                });
+            });
+
+            Behaviors.Add(
+                new Tuple<Type, IApplicationBehavior<Action<INavigationMessage>>>(
+                    typeof(TViewModel),
+                    Behavior<Action<INavigationMessage>, TViewModel, EventHandler>.Create(init, deinit, actionFactory)));
+            return this;
+        }
+
         public NavigationEvents Register<T, THandler>(Action<T, THandler> init, Action<T, THandler> deinit, Func<Action<INavigationMessage>, THandler> actionFactory)
         {
             Behaviors.Add(

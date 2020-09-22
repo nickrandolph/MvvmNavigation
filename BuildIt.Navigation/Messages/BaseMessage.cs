@@ -4,6 +4,10 @@
     {
         public object Sender { get; set; }
 
+        protected BaseMessage()
+        { 
+        }
+
         protected BaseMessage(object sender)
         {
             Sender = sender;

@@ -2,6 +2,11 @@
 {
     public interface INavigationMessage
     {
-        object Sender { get; }
+        object Sender { get; set; }
+    }
+
+    public interface INavigationMessageWithParameter<TParameter>:INavigationMessage
+    {
+        TParameter Parameter { get; set; }
     }
 }

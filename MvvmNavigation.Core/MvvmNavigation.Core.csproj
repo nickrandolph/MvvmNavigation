@@ -11,10 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ViewModels\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\MvvmNavigation.ViewModels\MvvmNavigation.ViewModels.csproj" />
     <ProjectReference Include="..\BuildIt.Navigation\BuildIt.Navigation.csproj" />
   </ItemGroup>

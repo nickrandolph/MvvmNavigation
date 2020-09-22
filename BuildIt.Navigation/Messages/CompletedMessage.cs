@@ -6,6 +6,7 @@ namespace BuildIt.Navigation.Messages
 {
     public class CompletedMessage : BaseMessage
     {
+        public CompletedMessage() : base() { }
         public CompletedMessage(object sender) : base(sender) { }
 
     }
