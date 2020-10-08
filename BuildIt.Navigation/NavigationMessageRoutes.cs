@@ -5,7 +5,13 @@ using BuildIt.Navigation.Messages;
 
 namespace BuildIt.Navigation
 {
-    public class NavigationMessageRoutes
+    public interface INavigationMessageRoutes
+    {
+        IList<Tuple<Type, Type, Action<object, INavigationMessage, INavigationService>>> Behaviors { get; } 
+
+    }
+
+    public class NavigationMessageRoutes: INavigationMessageRoutes
     {
         public IList<Tuple<Type, Type, Action<object, INavigationMessage, INavigationService>>> Behaviors { get; } = new List<Tuple<Type, Type, Action<object, INavigationMessage, INavigationService>>>();
 

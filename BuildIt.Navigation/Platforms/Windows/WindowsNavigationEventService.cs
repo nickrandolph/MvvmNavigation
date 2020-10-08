@@ -5,30 +5,73 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 using BuildIt.Navigation.Messages;
+using Microsoft.Extensions.DependencyInjection;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 namespace BuildIt.Navigation
 {
-    
+    public interface IViewModelToViewMapping
+    {
+        Type ViewFromViewModel<TViewModel>();
 
-   
+        Type ViewFromViewModel(Type viewModelType);
+    }
+
+    public static class WindowsServiceCollectionHelpers
+    {
+        public static void RegisterNavigationService(this IServiceCollection services, Frame rootFrame)
+        {
+            services.AddSingleton<INavigationService>(sp =>
+            {
+                var eventService = sp.GetService<INavigationEventService>();
+                var mapping = sp.GetService<IViewModelToViewMapping>();
+                var nav = new WindowsNavigationEventService(rootFrame, eventService, mapping);
+                return nav;
+            });
+        }
+    }
+
+    public class WindowsViewModelToViewMapping : IViewModelToViewMapping
+    {
+        private IDictionary<Type, Type> ViewModelToPageMap { get; } = new Dictionary<Type, Type>();
+
+        public Type ViewFromViewModel<TViewModel>()
+        {
+            return ViewFromViewModel(typeof(TViewModel));
+        }
+
+        public Type ViewFromViewModel(Type viewModelType)
+        {
+            return ViewModelToPageMap[viewModelType];
+        }
+
+        public WindowsViewModelToViewMapping RegisterForNavigation<TPage, TViewModel>() where TPage : Page
+        {
+            ViewModelToPageMap[typeof(TViewModel)] = typeof(TPage);
+            return this;
+        }
+    }
+
+
 
     public class WindowsNavigationEventService : INavigationService
     {
         private Frame NavigationFrame { get; }
-        public IDictionary<Type, Type> ViewModelToPageMap { get; } = new Dictionary<Type, Type>();
 
         private INavigationEventService EventService { get; }
 
+        private IViewModelToViewMapping Mapping { get; }
 
         public WindowsNavigationEventService(
             Frame navigationFrame,
-            INavigationEventService eventService)
+            INavigationEventService eventService,
+            IViewModelToViewMapping mapping)
         {
             NavigationFrame = navigationFrame;
             NavigationFrame.Navigated += OnNavigated;
             EventService = eventService;
+            Mapping = mapping;
         }
 
 
@@ -39,14 +82,9 @@ namespace BuildIt.Navigation
 
         public async Task Navigate<TViewModel>()
         {
-            NavigationFrame.Navigate(ViewModelToPageMap[typeof(TViewModel)]);
+            NavigationFrame.Navigate(Mapping.ViewFromViewModel<TViewModel>());
         }
 
-        public WindowsNavigationEventService RegisterForNavigation<TPage, TViewModel>() where TPage : Page
-        {
-            ViewModelToPageMap[typeof(TViewModel)] = typeof(TPage);
-            return this;
-        }
 
         private object PreviousPage { get; set; }
         private void OnNavigated(object sender, NavigationEventArgs e)

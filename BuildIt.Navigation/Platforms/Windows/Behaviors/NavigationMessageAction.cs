@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Windows.UI.Xaml;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace BuildIt.Navigation.Behaviors
 {
@@ -25,8 +27,10 @@ namespace BuildIt.Navigation.Behaviors
         {
             var messageSender = (sender as FrameworkElement).DataContext;
 
-            var args = new List<object>();
-            args.Add(messageSender);
+            var args = new List<object>
+            {
+                messageSender
+            };
             if (MessageParameter != null)
             {
                 var constructor = MessageType.GetConstructors().FirstOrDefault();
@@ -50,7 +54,7 @@ namespace BuildIt.Navigation.Behaviors
 
             var message = Activator.CreateInstance(MessageType, args.ToArray()) as INavigationMessage;
 
-            (Application.Current as INavigationApplication)?.EventService?.RaiseNavigationMessage(message);
+            (Application.Current as INavigationApplication)?.AppService?.Services.GetService<INavigationEventService>().RaiseNavigationMessage(message);
 
             return true;
         }

@@ -1,5 +1,6 @@
 ﻿using BuildIt.Navigation;
 using BuildIt.Navigation.Messages;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MvvmNavigation.Messages;
 using MvvmNavigation.ViewModels;
@@ -17,52 +18,16 @@ namespace MvvmNavigation
     /// </summary>
     sealed partial class App : Application, INavigationApplication
     {
+
         /// <summary>
         /// This is required for the INavigationApplication implementation,
         /// making it possible for the NavigationMessageAction to resolve 
         /// the INavigationEventService so that it can raise messages
         /// </summary>
-        public INavigationEventService EventService { get; private set; }
+        public IApplicationService AppService { get; } = new MvvmApplicationServices();
 
-        /// <summary>
-        /// This is the mapping from messages to navigation actions
-        /// </summary>
-        private NavigationMessageRoutes MessageRoutes { get; } = new NavigationMessageRoutes()
-            .RegisterNavigate<MainViewModel, CompletedMessage, SecondViewModel>()
-            .RegisterGoBack<SecondViewModel, CloseMessage>()
-            .Register<MainViewModel, CompletedWithStatusMessage<CompletionStates>>((vm, msg, nav) =>
-            {
-                if (msg.Parameter == CompletionStates.One)
-                {
-                    nav.Navigate<SecondViewModel>();
-                }
-                else
-                {
-                    nav.Navigate<ThirdViewModel>();
-                }
-            })
-            .RegisterGoBack<CloseMessage>();
 
-        /// <summary>
-        /// This maps events to messages
-        /// </summary>
-        private NavigationEvents Events { get; } = new NavigationEvents()
-            .Register<MainViewModel, EventHandler>(
-                        (v, a) => v.ViewModelDone += a,
-                        (v, a) => v.ViewModelDone -= a,
-                        (nav) => (s, e) => nav(s.Complete(CompletionStates.One))
-            )
 
-            .RegisterMessageWithParameter<MainViewModel, CompletedWithStatusMessage<CompletionStates>, CompletionStates>
-                ((v, a) => v.ViewModelAlsoDone += a, (v, a) => v.ViewModelAlsoDone -= a, CompletionStates.Two)
-            
-            .RegisterMessage<SecondViewModel, CloseMessage>
-                ((v,a) => v.ViewModelDone += a,(v,a) => v.ViewModelDone -= a)
-            
-            .Register<ThirdViewModel, EventHandler>(
-                        (v, a) => v.ViewModelDone += a,
-                        (v, a) => v.ViewModelDone -= a,
-                        (nav) => (s, e) => nav(s.Close()));
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -100,13 +65,24 @@ namespace MvvmNavigation
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
-                EventService = new NavigationEventService(Events);
-                var nav= new WindowsNavigationEventService(rootFrame, EventService)
-                                .RegisterForNavigation<MainPage, MainViewModel>()
-                                .RegisterForNavigation<SecondPage, SecondViewModel>()
-                                .RegisterForNavigation<ThirdPage, ThirdViewModel>();
-                var messageService = new NavigationMessageService(nav, EventService, MessageRoutes);
+                AppService.ConfigureServices(services =>
+                {
+                    services.AddSingleton<IViewModelToViewMapping>(sp =>
+                    {
+                        var nav = new WindowsViewModelToViewMapping()
+                                    .RegisterForNavigation<MainPage, MainViewModel>()
+                                    .RegisterForNavigation<SecondPage, SecondViewModel>()
+                                    .RegisterForNavigation<ThirdPage, ThirdViewModel>();
+                        return nav;
+                    });
 
+                    services.RegisterNavigationEventService();
+                    services.RegisterNavigationService(rootFrame);
+                    services.RegisterNavigationMessageService();
+                });
+
+                // Retrieve service collection to ensure message service is created
+                var messaging = AppService.Services.GetService<INavigationMessageService>();
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {

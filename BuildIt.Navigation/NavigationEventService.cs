@@ -9,10 +9,9 @@ namespace BuildIt.Navigation
     public class NavigationEventService : INavigationEventService
     {
         public ISubject<INavigationMessage> Messages { get; } = new Subject<INavigationMessage>();
-        private NavigationEvents Events { get; }
+        private INavigationEvents Events { get; }
 
-        public NavigationEventService(
-        NavigationEvents events)
+        public NavigationEventService(INavigationEvents events)
         {
             Events = events;
         }

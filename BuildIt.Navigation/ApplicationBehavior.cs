@@ -4,6 +4,7 @@ using System.Text;
 
 namespace BuildIt.Navigation
 {
+
     public class Behavior<TService, T, THandler> : IApplicationBehavior<TService>
     {
         private Action<T, THandler> Init { get; set; }

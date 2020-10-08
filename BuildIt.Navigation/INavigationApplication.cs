@@ -2,6 +2,6 @@
 {
     public interface INavigationApplication
     {
-        INavigationEventService EventService { get; }
+        IApplicationService AppService { get; }
     }
 }

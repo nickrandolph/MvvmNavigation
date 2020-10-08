@@ -1,21 +1,47 @@
 ﻿using BuildIt.Navigation.Messages;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 
 namespace BuildIt.Navigation
 {
-    public class NavigationMessageService
+    public static class ServiceCollectionHelpers
+    {
+        public static void RegisterNavigationEventService(this IServiceCollection services)
+        {
+            services.AddSingleton<INavigationEventService>(sp =>
+            {
+                var events = sp.GetService<INavigationEvents>();
+                return new NavigationEventService(events);
+            });
+        }
+
+        public static void RegisterNavigationMessageService(this IServiceCollection services)
+        {
+            services.AddSingleton<INavigationMessageService>(sp =>
+            {
+                var eventService = sp.GetService<INavigationEventService>();
+                var navService = sp.GetService<INavigationService>();
+
+                var routes = sp.GetService<INavigationMessageRoutes>();
+
+                return new NavigationMessageService(navService, eventService, routes);
+            });
+        }
+    }
+
+    public class NavigationMessageService: INavigationMessageService
     {
         private INavigationService Navigation { get; }
 
         private INavigationEventService EventService { get; }
 
-        private NavigationMessageRoutes Routes { get; }
+        private INavigationMessageRoutes Routes { get; }
 
         public NavigationMessageService(
                 INavigationService navigation,
                 INavigationEventService eventService,
-                NavigationMessageRoutes routes)
+            INavigationMessageRoutes routes)
         {
             Navigation = navigation;
             EventService = eventService;

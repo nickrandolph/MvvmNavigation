@@ -11,14 +11,24 @@
         <vms:SecondViewModel />
     </Page.DataContext>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock Text="{Binding Title}"
-                   Margin="100"
+        <TextBlock Margin="100"
                    FontSize="50"
-                   HorizontalAlignment="Center" />
+                   HorizontalAlignment="Center">
+            <Run Text="{x:Bind ViewModel.Title}" />
+            <Run Text=" " />
+            <Run Text="{x:Bind ViewModel.Count, Mode=OneWay}" />
+        </TextBlock>
+        <StackPanel Orientation="Horizontal">
         <Button Content="Go back to Main Page"
                 Click="GoBackClick"
                 VerticalAlignment="Bottom"
                 HorizontalAlignment="Center"
                 Margin="100" />
+            <Button Content="Increment"
+                    Click="{x:Bind ViewModel.Increment}"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Center"
+                    Margin="100" />
+        </StackPanel>
     </Grid>
 </Page>

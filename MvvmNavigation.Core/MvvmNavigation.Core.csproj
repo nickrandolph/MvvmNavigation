@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>MvvmNavigation.Core</AssemblyName>
     <RootNamespace>MvvmNavigation</RootNamespace>
+	  <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,4 +16,14 @@
     <ProjectReference Include="..\BuildIt.Navigation\BuildIt.Navigation.csproj" />
   </ItemGroup>
 
+
+	<!-- Add this as a new ItemGroup, replacing paths and names appropriately -->
+	<ItemGroup>
+		<!-- Note that this is not a "normal" ProjectReference.
+         It needs the additional 'OutputItemType' and 'ReferenceOutputAssmbly' attributes. -->
+		<ProjectReference Include="..\BuildIt.Navigation.Generator\BuildIt.Navigation.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="ViewModels\" />
+	</ItemGroup>
 </Project>

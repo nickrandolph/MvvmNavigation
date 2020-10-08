@@ -5,7 +5,14 @@ using System.Linq;
 
 namespace BuildIt.Navigation
 {
-    public class NavigationEvents
+    public interface INavigationEvents
+    {
+        void Wire(Action<INavigationMessage> raiseMessage, object page);
+
+        void Unwire(object page);
+    }
+
+    public class NavigationEvents: INavigationEvents
     {
         private IList<Tuple<Type, IApplicationBehavior<Action<INavigationMessage>>>> Behaviors { get; } = new List<Tuple<Type, IApplicationBehavior<Action<INavigationMessage>>>>();
 
@@ -19,9 +26,11 @@ namespace BuildIt.Navigation
             {
                 return new EventHandler((s, e) =>
                 {
-                    var msg = new TMessage();
-                    msg.Sender = s;
-                    msg.Parameter = parameter;
+                    var msg = new TMessage
+                    {
+                        Sender = s,
+                        Parameter = parameter
+                    };
                     nav(msg);
                 });
             });
@@ -41,8 +50,10 @@ namespace BuildIt.Navigation
             {
                 return new EventHandler((s, e) =>
                 {
-                    var msg = new TMessage();
-                    msg.Sender = s;
+                    var msg = new TMessage
+                    {
+                        Sender = s
+                    };
                     nav(msg);
                 });
             });
