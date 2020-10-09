@@ -10,6 +10,9 @@
 			-->
       <Version>6.2.9</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Mvvm">
+      <Version>7.0.0-preview3</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Uwp.Managed">
       <Version>2.0.1</Version>
     </PackageReference>
@@ -133,10 +136,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\..\..\MvvmNavigation.ViewModels\MvvmNavigation.ViewModels.csproj">
-      <Project>{6085fbd0-2475-4b14-b7d3-4b348f9491bb}</Project>
-      <Name>MvvmNavigation.ViewModels</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\BuildIt.Navigation\BuildIt.Navigation.csproj">
       <Project>{bc470167-1161-47d1-9b49-2be05d49a3a3}</Project>
       <Name>BuildIt.Navigation</Name>

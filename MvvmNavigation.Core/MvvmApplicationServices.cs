@@ -4,18 +4,23 @@ using Microsoft.Extensions.DependencyInjection;
 using MvvmNavigation.Messages;
 using MvvmNavigation.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MvvmNavigation
 {
-    public class MvvmApplicationServices:ApplicationService
+
+
+
+        [ApplicationService(nameof(RegisterEvents))]
+    public partial class MvvmApplicationServices:ApplicationService
     {
+        partial void RegisterEvents(NavigationEvents events);
+
+
         protected override void InitializeApplicationServices(IServiceCollection serviceRegistrations)
         {
             base.InitializeApplicationServices(serviceRegistrations);
 
-            HelloWorldGenerated.HelloWorld.SayHello(); 
+           // HelloWorldGenerated.HelloWorld.SayHello(); 
 
             serviceRegistrations.AddSingleton<INavigationEvents>(sp =>
             {
@@ -29,13 +34,15 @@ namespace MvvmNavigation
                 .RegisterMessageWithParameter<MainViewModel, CompletedWithStatusMessage<CompletionStates>, CompletionStates>
                     ((v, a) => v.ViewModelAlsoDone += a, (v, a) => v.ViewModelAlsoDone -= a, CompletionStates.Two)
 
-                // Implicit creation of close navigation message
-                .RegisterMessage<SecondViewModel, CloseMessage>
-                    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a)
+                //// Implicit creation of close navigation message
+                //.RegisterMessage<SecondViewModel, CloseMessage>
+                //    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a)
 
                 // Explicit creation of close navigation message
                 .Register<ThirdViewModel, EventHandler>
                     ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a, (nav) => (s, ev) => nav(s.Close()));
+
+                RegisterEvents(events);
 
                 return events;
             });
@@ -62,4 +69,6 @@ namespace MvvmNavigation
             });
         }
     }
+
+
 }

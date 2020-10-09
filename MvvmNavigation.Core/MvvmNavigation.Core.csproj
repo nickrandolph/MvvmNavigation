@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.0-preview3" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MvvmNavigation.ViewModels\MvvmNavigation.ViewModels.csproj" />
     <ProjectReference Include="..\BuildIt.Navigation\BuildIt.Navigation.csproj" />
   </ItemGroup>
 
@@ -22,8 +22,5 @@
 		<!-- Note that this is not a "normal" ProjectReference.
          It needs the additional 'OutputItemType' and 'ReferenceOutputAssmbly' attributes. -->
 		<ProjectReference Include="..\BuildIt.Navigation.Generator\BuildIt.Navigation.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="ViewModels\" />
 	</ItemGroup>
 </Project>
