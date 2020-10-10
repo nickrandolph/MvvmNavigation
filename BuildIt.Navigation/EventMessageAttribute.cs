@@ -9,9 +9,23 @@ namespace BuildIt.Navigation
     {
         public Type MessageType { get;  }
 
-        public EventMessageAttribute(Type messageType)
+        public Object MessageParameter { get; set; }
+
+        public EventMessageAttribute(Type messageType, object parameter=null)
         {
             MessageType = messageType;
+            MessageParameter = parameter;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ViewModelAttribute : Attribute
+    {
+        public Type ViewModelType { get; }
+
+        public ViewModelAttribute(Type viewModelType)
+        {
+            ViewModelType = viewModelType;
         }
     }
 
@@ -23,6 +37,17 @@ namespace BuildIt.Navigation
         public ApplicationServiceAttribute(string registrationMethod)
         {
             RegistrationMethod = registrationMethod;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class ApplicationAttribute : Attribute
+    {
+        public string RegistrationMappingMethod { get; }
+
+        public ApplicationAttribute(string registrationMethod)
+        {
+            RegistrationMappingMethod = registrationMethod;
         }
     }
 }

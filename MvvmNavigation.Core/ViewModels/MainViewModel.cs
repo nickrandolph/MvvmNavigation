@@ -1,4 +1,7 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using BuildIt.Navigation;
+using BuildIt.Navigation.Messages;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using MvvmNavigation.Messages;
 using System;
 using System.Threading.Tasks;
 
@@ -6,8 +9,11 @@ namespace MvvmNavigation.ViewModels
 {
     public class MainViewModel: ObservableObject
     {
-        
+
+        [EventMessage(typeof(CompletedWithStatusMessage<CompletionStates>), CompletionStates.One)]
         public event EventHandler ViewModelDone;
+
+        [EventMessage(typeof(CompletedWithStatusMessage<CompletionStates>), CompletionStates.Two)]
         public event EventHandler ViewModelAlsoDone;
 
         public string Title { get; } = "Main Page - VM";

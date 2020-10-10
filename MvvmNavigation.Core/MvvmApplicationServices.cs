@@ -24,23 +24,23 @@ namespace MvvmNavigation
 
             serviceRegistrations.AddSingleton<INavigationEvents>(sp =>
             {
-                var events = new NavigationEvents()
+                var events = new NavigationEvents();
 
                 // Explicit creation of navigation message
-                .Register<MainViewModel, EventHandler>
-                    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a, (nav) => (s, ev) => nav(s.Complete(CompletionStates.One)))
+                //.Register<MainViewModel, EventHandler>
+                //    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a, (nav) => (s, ev) => nav(s.Complete(CompletionStates.One)));
 
                 // Implicit creation of completed navigation message
-                .RegisterMessageWithParameter<MainViewModel, CompletedWithStatusMessage<CompletionStates>, CompletionStates>
-                    ((v, a) => v.ViewModelAlsoDone += a, (v, a) => v.ViewModelAlsoDone -= a, CompletionStates.Two)
+                //.RegisterMessageWithParameter<MainViewModel, CompletedWithStatusMessage<CompletionStates>, CompletionStates>
+                //    ((v, a) => v.ViewModelAlsoDone += a, (v, a) => v.ViewModelAlsoDone -= a, CompletionStates.Two);
 
                 //// Implicit creation of close navigation message
                 //.RegisterMessage<SecondViewModel, CloseMessage>
                 //    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a)
 
-                // Explicit creation of close navigation message
-                .Register<ThirdViewModel, EventHandler>
-                    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a, (nav) => (s, ev) => nav(s.Close()));
+                //// Explicit creation of close navigation message
+                //.Register<ThirdViewModel, EventHandler>
+                //    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a, (nav) => (s, ev) => nav(s.Close()));
 
                 RegisterEvents(events);
 

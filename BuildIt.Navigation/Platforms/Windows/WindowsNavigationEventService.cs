@@ -30,6 +30,20 @@ namespace BuildIt.Navigation
                 return nav;
             });
         }
+
+        public static void RegisterAllServices(this IServiceCollection services, Frame rootFrame, Action<WindowsViewModelToViewMapping> registerMappings)
+        {
+            services.AddSingleton<IViewModelToViewMapping>(sp =>
+            {
+                var nav = new WindowsViewModelToViewMapping();
+                registerMappings?.Invoke(nav);
+                return nav;
+            });
+
+            services.RegisterNavigationEventService();
+            services.RegisterNavigationService(rootFrame);
+            services.RegisterNavigationMessageService();
+        }
     }
 
     public class WindowsViewModelToViewMapping : IViewModelToViewMapping

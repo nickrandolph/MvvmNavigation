@@ -13,12 +13,10 @@ using Windows.UI.Xaml.Navigation;
 
 namespace MvvmNavigation
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
+
+    [Application(nameof(RegistarViewModelMappings))]
     sealed partial class App : Application, INavigationApplication
     {
-
         /// <summary>
         /// This is required for the INavigationApplication implementation,
         /// making it possible for the NavigationMessageAction to resolve 
@@ -26,7 +24,15 @@ namespace MvvmNavigation
         /// </summary>
         public IApplicationService AppService { get; } = new MvvmApplicationServices();
 
+        partial void RegistarViewModelMappings(WindowsViewModelToViewMapping mappings);
+        private void RegisterMappings(WindowsViewModelToViewMapping mappings)
+        {
+            mappings
+                .RegisterForNavigation<MainPage, MainViewModel>()
+                .RegisterForNavigation<SecondPage, SecondViewModel>()
+                .RegisterForNavigation<ThirdPage, ThirdViewModel>();
 
+        }
 
 
         /// <summary>
@@ -67,18 +73,19 @@ namespace MvvmNavigation
 
                 AppService.ConfigureServices(services =>
                 {
-                    services.AddSingleton<IViewModelToViewMapping>(sp =>
-                    {
-                        var nav = new WindowsViewModelToViewMapping()
-                                    .RegisterForNavigation<MainPage, MainViewModel>()
-                                    .RegisterForNavigation<SecondPage, SecondViewModel>()
-                                    .RegisterForNavigation<ThirdPage, ThirdViewModel>();
-                        return nav;
-                    });
+                    services.RegisterAllServices(rootFrame, RegisterMappings);
+                    //services.AddSingleton<IViewModelToViewMapping>(sp =>
+                    //{
+                    //    var nav = new WindowsViewModelToViewMapping()
+                    //                .RegisterForNavigation<MainPage, MainViewModel>()
+                    //                .RegisterForNavigation<SecondPage, SecondViewModel>()
+                    //                .RegisterForNavigation<ThirdPage, ThirdViewModel>();
+                    //    return nav;
+                    //});
 
-                    services.RegisterNavigationEventService();
-                    services.RegisterNavigationService(rootFrame);
-                    services.RegisterNavigationMessageService();
+                    //services.RegisterNavigationEventService();
+                    //services.RegisterNavigationService(rootFrame);
+                    //services.RegisterNavigationMessageService();
                 });
 
                 // Retrieve service collection to ensure message service is created

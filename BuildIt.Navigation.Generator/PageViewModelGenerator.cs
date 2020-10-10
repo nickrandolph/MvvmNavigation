@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace BuildIt.Navigation.Generator
 {
     [Generator]
-    public class EventToNavigationMessageGenerator : ISourceGenerator
+    public class PageViewModelGenerator : ISourceGenerator
     {
 
         public void Execute(GeneratorExecutionContext context)
