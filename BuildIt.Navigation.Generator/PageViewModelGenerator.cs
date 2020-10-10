@@ -23,133 +23,95 @@ namespace BuildIt.Navigation.Generator
                 // we can retrieve the populated instance via the context
                 var syntaxReceiver = context.SyntaxReceiver as SyntaxReceiver;
 
+                if(string.IsNullOrWhiteSpace( syntaxReceiver?.AppTypeName))
+                {
+                    return;
+                }
+
                 var compilation = context.Compilation;
 
                 //var evt = syntaxReceiver.Events.FirstOrDefault();
 
                 foreach (var reg in syntaxReceiver.Registrations)
                 {
-                    var evt = reg.EventSyntax;
+                    var messageAttribute = reg.MappingSyntax;
 
-                    var messageAttribute = evt.AttributeLists
-                        .FirstOrDefault()?.Attributes
-                        .FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax).Identifier.Text + "Attribute" == typeof(EventMessageAttribute).Name);
+                    //var messageAttribute = evt.AttributeLists
+                    //    .FirstOrDefault()?.Attributes
+                    //    .FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax).Identifier.Text + "Attribute" == typeof(EventMessageAttribute).Name);
 
-                    var allNodes = messageAttribute.ArgumentList.DescendantNodes();
+                    var allNodes = messageAttribute.DescendantNodes();
 
-                    var genericType = allNodes
-                        .Where(x => x.Kind() == SyntaxKind.GenericName)
-                        .FirstOrDefault() as GenericNameSyntax;
-
-                    var syntaxTree = evt.SyntaxTree;
+                    var syntaxTree = messageAttribute.SyntaxTree;
                     var model = compilation.GetSemanticModel(syntaxTree);
 
-                    if (genericType == null)
-                    {
-                        var node = allNodes
-                            .Where(x => x.Kind() == SyntaxKind.IdentifierName)
-                            .FirstOrDefault() as IdentifierNameSyntax;
-
-
-                        var symbol = model.GetSymbolInfo(node).Symbol as ITypeSymbol;
-
-                        //var typeName = symbol.Name;
-                        //var ns = symbol.ContainingNamespace;
-                        //var namespaceName = string.Empty;
-                        //while (ns != null)
-                        //{
-                        //    namespaceName = ns.Name + (namespaceName == string.Empty || ns.Name == string.Empty ? "" : ".") + namespaceName;
-                        //    ns = ns.ContainingNamespace;
-                        //}
-                        reg.MessageTypeName = symbol.ToString();
-                        //reg.MessageNamespace = namespaceName;
-                    }
-                    else
-                    {
-                        var symbol = model.GetSymbolInfo(genericType).Symbol as ITypeSymbol;
-                        reg.MessageTypeName = symbol.ToString();
-
-                        var genericTypeParameter = genericType
-                            .DescendantNodes()
+                    var node = allNodes
                         .Where(x => x.Kind() == SyntaxKind.IdentifierName)
                         .FirstOrDefault() as IdentifierNameSyntax;
-                        symbol = model.GetSymbolInfo(genericTypeParameter).Symbol as ITypeSymbol;
-                        reg.ParameterType = symbol.ToString();
 
-                        var ns = symbol.ContainingNamespace;
-                        var namespaceName = string.Empty;
-                        while (ns != null)
-                        {
-                            namespaceName = ns.Name + (namespaceName == string.Empty || ns.Name == string.Empty ? "" : ".") + namespaceName;
-                            ns = ns.ContainingNamespace;
-                        }
-                        reg.ParameterNamespace = namespaceName;
 
-                        var messageParamater = allNodes
-                        .Where(x => x.Kind() == SyntaxKind.SimpleMemberAccessExpression)
-                        .FirstOrDefault() as MemberAccessExpressionSyntax;
-                        reg.ParameterValueAsString = messageParamater.ToString();
+                    var symbol = model.GetSymbolInfo(node).Symbol as ITypeSymbol;
+
+                    var typeName = symbol.Name;
+                    var ns = symbol.ContainingNamespace;
+                    var namespaceName = string.Empty;
+                    while (ns != null)
+                    {
+                        namespaceName = ns.Name + (namespaceName == string.Empty || ns.Name == string.Empty ? "" : ".") + namespaceName;
+                        ns = ns.ContainingNamespace;
                     }
-
-
-                    var classDec = evt.Parent as ClassDeclarationSyntax;
-
-                    //symbol = model.GetSymbolInfo(classDec).Symbol as ITypeSymbol;
-                    var vmType = classDec.Identifier.ValueText;// symbol.Name;
-                    var nsDec = classDec.Parent as NamespaceDeclarationSyntax;
-
-                    var vmNamespace = nsDec.Name.ToString();
-
-                    reg.ViewModelTypeName = vmType;
-                    reg.ViewModelNamespace = vmNamespace;
+                    reg.ViewModelTypeName = typeName;
+                    reg.ViewModelNamespace = namespaceName;
                 }
 
                 var sourceBuilder = new StringBuilder($@"
-using BuildIt.Navigation;
-using BuildIt.Navigation.Messages;
-using Microsoft.Extensions.DependencyInjection;
-{syntaxReceiver.Namespaces}
-using System;
-namespace {syntaxReceiver.AppServiceNamespace}
-{{
-    public partial class {syntaxReceiver.AppServiceTypeName}
-    {{
-        
-
-        partial void {syntaxReceiver.RegistrationPartialMethodName}(NavigationEvents events)
-        {{
-");
+                using BuildIt.Navigation;
+                {syntaxReceiver.Namespaces}
+                using System;
+                namespace {syntaxReceiver.AppNamespace}
+                {{
+                    public partial class {syntaxReceiver.AppTypeName}
+                    {{
+                        partial void {syntaxReceiver.RegistrationPartialMethodName}(WindowsViewModelToViewMapping mappings)
+                        {{
+                ");
 
                 foreach (var reg in syntaxReceiver.Registrations)
                 {
-                    if (string.IsNullOrWhiteSpace(reg.ParameterValueAsString))
-                    {
-                        sourceBuilder.AppendLine(
-                            $@"
-                                    events.RegisterMessage<{reg.ViewModelTypeName}, {reg.MessageTypeName}>
-                                            ((v, a) => v.{reg.EventName} += a, (v, a) => v.{reg.EventName} -= a);
-                            ");
-                    }
-                    else
-                    {
-                        sourceBuilder.AppendLine(
-                            $@"
-                                    events.RegisterMessageWithParameter<{reg.ViewModelTypeName}, {reg.MessageTypeName}, {reg.ParameterType}>
-                                            ((v, a) => v.{reg.EventName} += a, (v, a) => v.{reg.EventName} -= a, {reg.ParameterValueAsString});
-                            ");
-                        //.RegisterMessageWithParameter<MainViewModel, CompletedWithStatusMessage<CompletionStates>, CompletionStates>
-                        //    ((v, a) => v.ViewModelAlsoDone += a, (v, a) => v.ViewModelAlsoDone -= a, CompletionStates.Two);
-                    }
+                    sourceBuilder.AppendLine(
+                        $@"
+                                        mappings.RegisterForNavigation<{reg.PageTypeName}, {reg.ViewModelTypeName}>();
+                                        ");
                 }
 
                 // finish creating the source to inject
                 sourceBuilder.Append(@"
-        }
-    }
-}");
+                        }
+                    }
+                }");
 
                 // inject the created source into the users compilation
-                context.AddSource("MvvmApplicationServices.generated.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+                context.AddSource("App.generated.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+
+
+//                foreach (var reg in syntaxReceiver.Registrations)
+//                {
+//                    sourceBuilder = new StringBuilder($@"
+//using BuildIt.Navigation;
+//using {reg.ViewModelNamespace}
+//using System;
+//namespace {reg.PageNamespace}
+//{{
+//    public partial class {reg.PageTypeName}
+//    {{
+//        public {reg.ViewModelTypeName} ViewModel2 => DataContext as {reg.ViewModelTypeName};
+//    }}
+//}}");
+
+//                    // inject the created source into the users compilation
+//                    context.AddSource($"{reg.PageTypeName}.generated.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+
+//                }
             }
             catch(Exception ex)
             {
@@ -161,24 +123,24 @@ namespace {syntaxReceiver.AppServiceNamespace}
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            //if (!Debugger.IsAttached)
-            //{
-            //    Debugger.Launch();
-            //}
+            if (!Debugger.IsAttached)
+            {
+                Debugger.Launch();
+            }
 
             context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
         }
 
         private class SyntaxReceiver : ISyntaxReceiver
         {
-            public string AppServiceTypeName { get; set; }// => "MvvmApplicationServices";
-            public string AppServiceNamespace { get; set; }// => "MvvmNavigation";
+            public string AppTypeName { get; set; }
+            public string AppNamespace { get; set; }
 
-            public string RegistrationPartialMethodName { get; set; }// = "RegisterEvents";
+            public string RegistrationPartialMethodName { get; set; }
 
             public string Namespaces => string.Join(Environment.NewLine, (from reg in Registrations
-                                                                          where reg.ParameterNamespace!=null
-                                                                           select reg.ParameterNamespace)
+                                                                          where reg.PageNamespace!=null
+                                                                           select reg.PageNamespace)
                                         .Union(from reg in Registrations
                                                where reg.ViewModelNamespace!=null
                                                select reg.ViewModelNamespace)
@@ -187,7 +149,7 @@ namespace {syntaxReceiver.AppServiceNamespace}
                                         .Select(x => $"using {x};"));
 
 
-            public IList<EventRegistration> Registrations { get; } = new List<EventRegistration>();
+            public IList<PageViewModelRegistration> Registrations { get; } = new List<PageViewModelRegistration>();
 
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
             {
@@ -197,15 +159,16 @@ namespace {syntaxReceiver.AppServiceNamespace}
 
                     if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax)
                     {
-                        var classAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax).Identifier.Text + "Attribute" == typeof(ApplicationServiceAttribute).Name);
+                        var classAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax)?.Identifier.Text + "Attribute" == typeof(ApplicationAttribute).Name);
+                        var viewModelClassAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax)?.Identifier.Text + "Attribute" == typeof(ViewModelAttribute).Name);
                         if (classAttribute != null)
                         {
-                            AppServiceTypeName = classDeclarationSyntax.Identifier.ValueText;
+                            AppTypeName = classDeclarationSyntax.Identifier.ValueText;
 
                             var namespaceSyntax = classDeclarationSyntax.Parent as NamespaceDeclarationSyntax;
                             if (namespaceSyntax != null)
                             {
-                                AppServiceNamespace = namespaceSyntax.Name.ToString();
+                                AppNamespace = namespaceSyntax.Name.ToString();
                             }
 
 
@@ -218,30 +181,24 @@ namespace {syntaxReceiver.AppServiceNamespace}
                             RegistrationPartialMethodName = identifier.Identifier.ValueText;
 
                         }
-                    }
-
-                    if (syntaxNode is EventFieldDeclarationSyntax eventDeclarationSyntax)
-                    {
-                        var messageAttribute = eventDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax).Identifier.Text + "Attribute" == typeof(EventMessageAttribute).Name);
-                        if (messageAttribute != null)
+                        else if(viewModelClassAttribute!=null)
                         {
-                            var eventName = eventDeclarationSyntax.Declaration.Variables.FirstOrDefault().Identifier.ValueText;
-                            Registrations.Add(new EventRegistration() { 
-                                EventSyntax = eventDeclarationSyntax,
-                            EventName = eventName
+                            var pageTypeName = classDeclarationSyntax.Identifier.ValueText;
+                            var pageNamespace = "";
+                            var namespaceSyntax = classDeclarationSyntax.Parent as NamespaceDeclarationSyntax;
+                            if (namespaceSyntax != null)
+                            {
+                                pageNamespace = namespaceSyntax.Name.ToString();
+                            }
+                            var firstArgument = viewModelClassAttribute.ArgumentList.Arguments.FirstOrDefault();
+                            
+                            Registrations.Add(new PageViewModelRegistration()
+                            {
+                                MappingSyntax = firstArgument,
+                                PageTypeName=pageTypeName,
+                                PageNamespace=pageNamespace
                             });
-                            //SemanticModel model = compilation.GetSemanticModel(syntaxTree);
-                            //ISymbol symbol = model.GetSymbolInfo(syntaxNode).Symbol;
-                            // symbol is probably an ITypeSymbol
 
-                            //if(!Debugger.IsAttached)
-                            //{
-                            //    Debugger.Launch();
-                            //}
-                            //else
-                            //{
-                            //    Debugger.Break();
-                            //}
                         }
                     }
                 }
@@ -252,18 +209,13 @@ namespace {syntaxReceiver.AppServiceNamespace}
             }
         }
 
-        private class EventRegistration
+        private class PageViewModelRegistration
         {
+            public string PageTypeName { get; set; }
+            public string PageNamespace { get; set; }
             public string ViewModelTypeName { get; set; }
             public string ViewModelNamespace { get; set; }
-            public string MessageTypeName { get; set; }
-            //public string MessageNamespace { get; set; }
-            public string EventName { get; set; }
-            public string ParameterType { get; set; }
-            public string ParameterNamespace { get; set; }
-            public string ParameterValueAsString { get; set; }
-
-            public EventFieldDeclarationSyntax EventSyntax { get; set; }
+            public AttributeArgumentSyntax MappingSyntax { get; set; }
         }
     }
 }

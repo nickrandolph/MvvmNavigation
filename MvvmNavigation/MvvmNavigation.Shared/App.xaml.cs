@@ -13,7 +13,6 @@ using Windows.UI.Xaml.Navigation;
 
 namespace MvvmNavigation
 {
-
     [Application(nameof(RegistarViewModelMappings))]
     sealed partial class App : Application, INavigationApplication
     {
@@ -25,15 +24,7 @@ namespace MvvmNavigation
         public IApplicationService AppService { get; } = new MvvmApplicationServices();
 
         partial void RegistarViewModelMappings(WindowsViewModelToViewMapping mappings);
-        private void RegisterMappings(WindowsViewModelToViewMapping mappings)
-        {
-            mappings
-                .RegisterForNavigation<MainPage, MainViewModel>()
-                .RegisterForNavigation<SecondPage, SecondViewModel>()
-                .RegisterForNavigation<ThirdPage, ThirdViewModel>();
-
-        }
-
+        
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -73,19 +64,7 @@ namespace MvvmNavigation
 
                 AppService.ConfigureServices(services =>
                 {
-                    services.RegisterAllServices(rootFrame, RegisterMappings);
-                    //services.AddSingleton<IViewModelToViewMapping>(sp =>
-                    //{
-                    //    var nav = new WindowsViewModelToViewMapping()
-                    //                .RegisterForNavigation<MainPage, MainViewModel>()
-                    //                .RegisterForNavigation<SecondPage, SecondViewModel>()
-                    //                .RegisterForNavigation<ThirdPage, ThirdViewModel>();
-                    //    return nav;
-                    //});
-
-                    //services.RegisterNavigationEventService();
-                    //services.RegisterNavigationService(rootFrame);
-                    //services.RegisterNavigationMessageService();
+                    services.RegisterAllServices(rootFrame,(WindowsViewModelToViewMapping mapping)=> RegistarViewModelMappings(mapping));  
                 });
 
                 // Retrieve service collection to ensure message service is created

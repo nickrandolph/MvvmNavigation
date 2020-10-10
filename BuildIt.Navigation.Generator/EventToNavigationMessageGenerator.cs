@@ -22,6 +22,11 @@ namespace BuildIt.Navigation.Generator
                 // the generator infrastructure will create a receiver and populate it
                 // we can retrieve the populated instance via the context
                 var syntaxReceiver = context.SyntaxReceiver as SyntaxReceiver;
+                if (string.IsNullOrWhiteSpace( syntaxReceiver?.AppServiceTypeName))
+                {
+                    return;
+                }
+
 
                 var compilation = context.Compilation;
 
@@ -197,7 +202,7 @@ namespace {syntaxReceiver.AppServiceNamespace}
 
                     if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax)
                     {
-                        var classAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax).Identifier.Text + "Attribute" == typeof(ApplicationServiceAttribute).Name);
+                        var classAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax)?.Identifier.Text + "Attribute" == typeof(ApplicationServiceAttribute).Name);
                         if (classAttribute != null)
                         {
                             AppServiceTypeName = classDeclarationSyntax.Identifier.ValueText;
