@@ -7,6 +7,8 @@ namespace MvvmNavigation.Messages
     public enum CompletionStates
     {
         One,
-        Two
+        Two,
+        Three,
+        Four
     }
 }

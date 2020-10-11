@@ -53,13 +53,20 @@ namespace MvvmNavigation
                     .RegisterNavigate<MainViewModel, CompletedMessage, SecondViewModel>()
                     .Register<MainViewModel, CompletedWithStatusMessage<CompletionStates>>((vm, msg, nav) =>
                     {
-                        if (msg.Parameter == CompletionStates.One)
+                        switch(msg.Parameter)
                         {
-                            nav.Navigate<SecondViewModel>();
-                        }
-                        else
-                        {
-                            nav.Navigate<ThirdViewModel>();
+                            case CompletionStates.One:
+                                nav.Navigate<MainViewModel>();
+                                break;
+                            case CompletionStates.Two:
+                                nav.Navigate<SecondViewModel>();
+                                break;
+                            case CompletionStates.Three:
+                                nav.Navigate<ThirdViewModel>();
+                                break;
+                            case CompletionStates.Four:
+                                nav.Navigate<FourthViewModel>();
+                                break;
                         }
                     })
                     .RegisterGoBack<SecondViewModel, CloseMessage>()

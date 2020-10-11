@@ -123,10 +123,10 @@ namespace BuildIt.Navigation.Generator
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            if (!Debugger.IsAttached)
-            {
-                Debugger.Launch();
-            }
+            //if (!Debugger.IsAttached)
+            //{
+            //    Debugger.Launch();
+            //}
 
             context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
         }

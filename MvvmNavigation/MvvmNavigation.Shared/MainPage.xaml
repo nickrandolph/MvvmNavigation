@@ -19,33 +19,34 @@
                    Margin="100"
                    FontSize="50"
                    HorizontalAlignment="Center" />
-        <StackPanel 
-                    VerticalAlignment="Bottom"
+        <StackPanel VerticalAlignment="Bottom"
                     HorizontalAlignment="Center"
                     Margin="100">
-        <Button Content="Go to Second Page"
-                Click="GoToSecondPageClick"
-                />
+            <Button Content="Go to Second Page"
+                    Click="GoToSecondPageClick" />
             <Button Content="Go to Third Page"
                     Click="GoToThirdPageClick" />
 
-            <Button x:Name="button2"
-                    Content="Go To Second Page With Behavior"
-                  >
+            <Button Content="Go To Second Page With Behavior">
                 <Interactivity:Interaction.Behaviors>
-                    <Interactions:EventTriggerBehavior EventName="Click"
-                                                       SourceObject="{Binding ElementName=button2}">
-                        <builditbehaviors:NavigationMessageAction MessageType="builditmessages:CompletedMessage"/>
+                    <Interactions:EventTriggerBehavior EventName="Click">
+                        <builditbehaviors:NavigationMessageAction MessageType="builditmessages:CompletedMessage" />
                     </Interactions:EventTriggerBehavior>
                 </Interactivity:Interaction.Behaviors>
             </Button>
-            <Button x:Name="button3"
-                    Content="Go To Third Page With Behavior">
+            <Button Content="Go To Third Page With Behavior">
                 <Interactivity:Interaction.Behaviors>
-                    <Interactions:EventTriggerBehavior EventName="Click"
-                                                       SourceObject="{Binding ElementName=button3}">
+                    <Interactions:EventTriggerBehavior EventName="Click">
                         <builditbehaviors:NavigationMessageAction MessageType="localmessages:StateMessage"
-                                                       MessageParameter="Two"/>
+                                                                  MessageParameter="Three" />
+                    </Interactions:EventTriggerBehavior>
+                </Interactivity:Interaction.Behaviors>
+            </Button>
+            <Button Content="Go To Fourth Page">
+                <Interactivity:Interaction.Behaviors>
+                    <Interactions:EventTriggerBehavior EventName="Click">
+                        <builditbehaviors:NavigationMessageAction MessageType="localmessages:StateMessage"
+                                                                  MessageParameter="Four" />
                     </Interactions:EventTriggerBehavior>
                 </Interactivity:Interaction.Behaviors>
             </Button>

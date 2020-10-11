@@ -10,10 +10,10 @@ namespace MvvmNavigation.ViewModels
     public class MainViewModel: ObservableObject
     {
 
-        [EventMessage(typeof(CompletedWithStatusMessage<CompletionStates>), CompletionStates.One)]
+        [EventMessage(typeof(CompletedWithStatusMessage<CompletionStates>), CompletionStates.Two)]
         public event EventHandler ViewModelDone;
 
-        [EventMessage(typeof(CompletedWithStatusMessage<CompletionStates>), CompletionStates.Two)]
+        [EventMessage(typeof(CompletedWithStatusMessage<CompletionStates>), CompletionStates.Three)]
         public event EventHandler ViewModelAlsoDone;
 
         public string Title { get; } = "Main Page - VM";
