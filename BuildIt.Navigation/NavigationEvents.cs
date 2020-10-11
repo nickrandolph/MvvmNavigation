@@ -76,6 +76,10 @@ namespace BuildIt.Navigation
 
         public void Wire(Action<INavigationMessage> raiseMessage, object page)
         {
+            if (page == null)
+            {
+                return;
+            }
             var typeOfPage = page.GetType();
             var behs = Behaviors.Where(x => x.Item1 == typeOfPage).Select(x => x.Item2);
             foreach (var Behavior in behs)

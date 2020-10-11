@@ -74,6 +74,11 @@ namespace MvvmNavigation
 
                 return routes;
             });
+
+            serviceRegistrations.AddTransient<MainViewModel>();
+            serviceRegistrations.AddTransient<SecondViewModel>();
+            serviceRegistrations.AddTransient<ThirdViewModel>();
+            serviceRegistrations.AddTransient<FourthViewModel>();
         }
     }
 

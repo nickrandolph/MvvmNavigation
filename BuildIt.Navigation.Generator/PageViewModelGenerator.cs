@@ -23,11 +23,6 @@ namespace BuildIt.Navigation.Generator
                 // we can retrieve the populated instance via the context
                 var syntaxReceiver = context.SyntaxReceiver as SyntaxReceiver;
 
-                if(string.IsNullOrWhiteSpace( syntaxReceiver?.AppTypeName))
-                {
-                    return;
-                }
-
                 var compilation = context.Compilation;
 
                 //var evt = syntaxReceiver.Events.FirstOrDefault();
@@ -64,7 +59,11 @@ namespace BuildIt.Navigation.Generator
                     reg.ViewModelNamespace = namespaceName;
                 }
 
-                var sourceBuilder = new StringBuilder($@"
+                if (!string.IsNullOrWhiteSpace(syntaxReceiver?.AppTypeName))
+                {
+
+
+                    var sourceBuilder = new StringBuilder($@"
                 using BuildIt.Navigation;
                 {syntaxReceiver.Namespaces}
                 using System;
@@ -76,42 +75,42 @@ namespace BuildIt.Navigation.Generator
                         {{
                 ");
 
-                foreach (var reg in syntaxReceiver.Registrations)
-                {
-                    sourceBuilder.AppendLine(
-                        $@"
+                    foreach (var reg in syntaxReceiver.Registrations)
+                    {
+                        sourceBuilder.AppendLine(
+                            $@"
                                         mappings.RegisterForNavigation<{reg.PageTypeName}, {reg.ViewModelTypeName}>();
                                         ");
-                }
+                    }
 
-                // finish creating the source to inject
-                sourceBuilder.Append(@"
+                    // finish creating the source to inject
+                    sourceBuilder.Append(@"
                         }
                     }
                 }");
 
-                // inject the created source into the users compilation
-                context.AddSource("App.generated.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+                    // inject the created source into the users compilation
+                    context.AddSource("App.generated", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+                }
 
+                foreach (var reg in syntaxReceiver.Registrations)
+                {
+                    var regSourceBuilder = new StringBuilder($@"
+using BuildIt.Navigation;
+using {reg.ViewModelNamespace};
+using System;
+namespace {reg.PageNamespace}
+{{
+    public partial class {reg.PageTypeName}
+    {{
+        public {reg.ViewModelTypeName} ViewModel2 => DataContext as {reg.ViewModelTypeName};
+    }}
+}}");
 
-//                foreach (var reg in syntaxReceiver.Registrations)
-//                {
-//                    sourceBuilder = new StringBuilder($@"
-//using BuildIt.Navigation;
-//using {reg.ViewModelNamespace}
-//using System;
-//namespace {reg.PageNamespace}
-//{{
-//    public partial class {reg.PageTypeName}
-//    {{
-//        public {reg.ViewModelTypeName} ViewModel2 => DataContext as {reg.ViewModelTypeName};
-//    }}
-//}}");
+                    // inject the created source into the users compilation
+                    context.AddSource($"{reg.PageTypeName}.generated", SourceText.From(regSourceBuilder.ToString(), Encoding.UTF8));
 
-//                    // inject the created source into the users compilation
-//                    context.AddSource($"{reg.PageTypeName}.generated.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
-
-//                }
+                }
             }
             catch(Exception ex)
             {

@@ -6,7 +6,6 @@ using Windows.UI.Xaml.Controls;
 namespace MvvmNavigation
 {
     [ViewModel(typeof(SecondViewModel))]
-
     public sealed partial class SecondPage : Page
     {
         public SecondViewModel ViewModel => DataContext as SecondViewModel;

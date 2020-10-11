@@ -10,10 +10,8 @@
       xmlns:Interactions="using:Microsoft.Xaml.Interactions.Core"
       xmlns:builditmessages="using:BuildIt.Navigation.Messages"
       xmlns:builditbehaviors="using:BuildIt.Navigation.Behaviors"
+      DataContext="{x:Bind Converter={StaticResource PageViewModelConverter}}"
       mc:Ignorable="d">
-    <Page.DataContext>
-        <vms:MainViewModel />
-    </Page.DataContext>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <TextBlock Text="{Binding Title}"
                    Margin="100"

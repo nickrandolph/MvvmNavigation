@@ -6,15 +6,13 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d"
+      DataContext="{x:Bind Converter={StaticResource PageViewModelConverter}}"
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <Page.DataContext>
-        <vms:SecondViewModel />
-    </Page.DataContext>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <TextBlock Margin="100"
                    FontSize="50"
                    HorizontalAlignment="Center">
-            <Run Text="{x:Bind ViewModel.Title}" />
+            <Run Text="{x:Bind ViewModel.Title, Mode=OneWay}" />
             <Run Text=" " />
             <Run Text="{x:Bind ViewModel.Count, Mode=OneWay}" />
         </TextBlock>
