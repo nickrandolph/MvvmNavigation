@@ -1,17 +1,16 @@
 ﻿using BuildIt.Navigation;
 using MvvmNavigation.ViewModels;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
 
 namespace MvvmNavigation
 {
-    [ViewModel(typeof(ThirdViewModel), nameof(InitViewModel))]
-    public sealed partial class ThirdPage : Page
+    [ViewModel(typeof(SecondViewModel), nameof(InitViewModel))]
+    public sealed partial class SecondPage
     {
         partial void InitViewModel();
-        public ThirdViewModel ViewModel => this.ViewModel(() => DataContext as ThirdViewModel, () => InitViewModel());
+        public SecondViewModel ViewModel => this.ViewModel(() => DataContext as SecondViewModel, () => InitViewModel());
 
-        public ThirdPage()
+        public SecondPage()
         {
             InitializeComponent();
         }

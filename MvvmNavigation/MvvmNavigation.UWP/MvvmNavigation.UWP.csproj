@@ -31,6 +31,10 @@
     <!-- Note that this is not a "normal" ProjectReference.
          It needs the additional 'OutputItemType' and 'ReferenceOutputAssmbly' attributes. -->
     <ProjectReference Include="..\..\BuildIt.Navigation.Generator\BuildIt.Navigation.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\MvvmNavigation.UI\MvvmNavigation.UI.csproj">
+      <Project>{0abea8ce-abf1-46b7-acc3-326e78c6bc28}</Project>
+      <Name>MvvmNavigation.UI</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

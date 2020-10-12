@@ -1,26 +1,28 @@
 ﻿using BuildIt.Navigation;
 using MvvmNavigation.ViewModels;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
 
 namespace MvvmNavigation
 {
-    [ViewModel(typeof(MainViewModel))]
-    public sealed partial class MainPage : Page
+    [ViewModel(typeof(MainViewModel), nameof(InitViewModel))]
+    public sealed partial class MainPage
     {
+        partial void InitViewModel();
+        public MainViewModel ViewModel => this.ViewModel(() => DataContext as MainViewModel, () => InitViewModel());
+
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
-        private void GoToSecondPageClick(object sender, RoutedEventArgs e)
+        private async void GoToSecondPageClick(object sender, RoutedEventArgs e)
         {
-            (DataContext as MainViewModel)?.DoSomething();
+            await ViewModel.DoSomething();
         }
 
-        private void GoToThirdPageClick(object sender, RoutedEventArgs e)
+        private async void GoToThirdPageClick(object sender, RoutedEventArgs e)
         {
-            (DataContext as MainViewModel)?.DoSomethingDifferent();
+            await ViewModel.DoSomethingDifferent();
         }
     }
 

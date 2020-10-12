@@ -14,21 +14,21 @@ using Windows.UI.Xaml.Navigation;
 
 namespace BuildIt.Navigation
 {
-    public class PageViewModelConverter:IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            var sp = (Application.Current as INavigationApplication)?.AppService?.Services;
-            var viewModelType=sp.GetService<IViewModelToViewMapping>().ViewModelFromView(value.GetType());
-            var vm = sp.GetService(viewModelType);
-            return vm;
-        }
+    //public class PageViewModelConverter:IValueConverter
+    //{
+    //    public object Convert(object value, Type targetType, object parameter, string language)
+    //    {
+    //        var sp = (Application.Current as INavigationApplication)?.AppService?.Services;
+    //        var viewModelType=sp.GetService<IViewModelToViewMapping>().ViewModelFromView(value.GetType());
+    //        var vm = sp.GetService(viewModelType);
+    //        return vm;
+    //    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 
     public interface IViewModelToViewMapping
     {

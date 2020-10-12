@@ -3,6 +3,7 @@ using BuildIt.Navigation.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MvvmNavigation.Messages;
+using MvvmNavigation.UI;
 using MvvmNavigation.ViewModels;
 using System;
 using Windows.ApplicationModel;
@@ -64,7 +65,11 @@ namespace MvvmNavigation
 
                 AppService.ConfigureServices(services =>
                 {
-                    services.RegisterAllServices(rootFrame,(WindowsViewModelToViewMapping mapping)=> RegistarViewModelMappings(mapping));  
+                    services.RegisterAllServices(rootFrame,(WindowsViewModelToViewMapping mappings)=>
+                    {
+                        RegistarViewModelMappings(mappings);
+                        UIMapping.RegisterMappings(mappings);
+                    });  
                 });
 
                 // Retrieve service collection to ensure message service is created

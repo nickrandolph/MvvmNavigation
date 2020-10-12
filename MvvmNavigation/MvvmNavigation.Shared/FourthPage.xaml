@@ -10,11 +10,10 @@
       xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
       xmlns:Interactions="using:Microsoft.Xaml.Interactions.Core"
       mc:Ignorable="d"
-      DataContext="{x:Bind Converter={StaticResource PageViewModelConverter}}"
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="{Binding Title}" />
+        <TextBlock Text="{x:Bind ViewModel.Title}" />
         <Button Content="Go Back"
                 x:Name="button4">
             <Interactivity:Interaction.Behaviors>

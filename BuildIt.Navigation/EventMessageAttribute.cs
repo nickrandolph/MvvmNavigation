@@ -22,10 +22,12 @@ namespace BuildIt.Navigation
     public class ViewModelAttribute : Attribute
     {
         public Type ViewModelType { get; }
+        public string InitMethodName { get; }
 
-        public ViewModelAttribute(Type viewModelType)
+        public ViewModelAttribute(Type viewModelType, string initMethod=null)
         {
             ViewModelType = viewModelType;
+            InitMethodName = initMethod;
         }
     }
 

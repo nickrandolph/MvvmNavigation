@@ -95,15 +95,31 @@ namespace BuildIt.Navigation.Generator
 
                 foreach (var reg in syntaxReceiver.Registrations)
                 {
+                    var vmInit = string.IsNullOrWhiteSpace(reg.ViewModelInitMethodName) ? null :
+$@"
+ partial void {reg.ViewModelInitMethodName}()
+        {{
+            var sp = (Application.Current as INavigationApplication)?.AppService?.Services;
+            var viewModelType=sp.GetService<IViewModelToViewMapping>().ViewModelFromView<{reg.PageTypeName}>();
+            var vm = sp.GetService(viewModelType);
+            DataContext = vm;
+        }}
+";
+
                     var regSourceBuilder = new StringBuilder($@"
 using BuildIt.Navigation;
 using {reg.ViewModelNamespace};
 using System;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Microsoft.Extensions.DependencyInjection;
 namespace {reg.PageNamespace}
 {{
     public partial class {reg.PageTypeName}
     {{
-        public {reg.ViewModelTypeName} ViewModel2 => DataContext as {reg.ViewModelTypeName};
+        //public {reg.ViewModelTypeName} ViewModel2 => DataContext as {reg.ViewModelTypeName};
+
+        {vmInit}
     }}
 }}");
 
@@ -190,9 +206,17 @@ namespace {reg.PageNamespace}
                                 pageNamespace = namespaceSyntax.Name.ToString();
                             }
                             var firstArgument = viewModelClassAttribute.ArgumentList.Arguments.FirstOrDefault();
-                            
+
+                            var secondArgument = viewModelClassAttribute.ArgumentList.Arguments.Skip(1).FirstOrDefault();
+                            var identifier = secondArgument?.Expression
+                                                ?.DescendantNodes()
+                                                .Where(x => x.Kind() == SyntaxKind.IdentifierName)
+                                                .Skip(1)
+                                                .FirstOrDefault() as IdentifierNameSyntax;
+
                             Registrations.Add(new PageViewModelRegistration()
                             {
+                                ViewModelInitMethodName= identifier?.Identifier.ValueText,
                                 MappingSyntax = firstArgument,
                                 PageTypeName=pageTypeName,
                                 PageNamespace=pageNamespace
@@ -214,6 +238,7 @@ namespace {reg.PageNamespace}
             public string PageNamespace { get; set; }
             public string ViewModelTypeName { get; set; }
             public string ViewModelNamespace { get; set; }
+            public string ViewModelInitMethodName { get; set; }
             public AttributeArgumentSyntax MappingSyntax { get; set; }
         }
     }

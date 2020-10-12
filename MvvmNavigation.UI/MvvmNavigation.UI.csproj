@@ -1,0 +1,40 @@
+﻿<Project Sdk="MSBuild.Sdk.Extras">
+
+	<PropertyGroup>
+		<TargetFrameworks>uap10.0.16299.0</TargetFrameworks>
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$(TargetFramework.StartsWith('uap'))">
+		<DefineConstants>$(DefineConstants);NETFX_CORE;XAML;WINDOWS;WINDOWS_UWP;UWP</DefineConstants>
+		<TargetPlatformVersion>10.0.16299.0</TargetPlatformVersion>
+		<TargetPlatformMinVersion>10.0.16299.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="SecondPage.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Include="SecondPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<ProjectReference Include="..\BuildIt.Navigation\BuildIt.Navigation.csproj" />
+		<ProjectReference Include="..\MvvmNavigation.Core\MvvmNavigation.Core.csproj" />
+	</ItemGroup>
+
+
+	<!-- Add this as a new ItemGroup, replacing paths and names appropriately -->
+	<ItemGroup>
+		<!-- Note that this is not a "normal" ProjectReference.
+         It needs the additional 'OutputItemType' and 'ReferenceOutputAssmbly' attributes. -->
+		<ProjectReference Include="..\BuildIt.Navigation.Generator\BuildIt.Navigation.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+
+
+
+</Project>

@@ -12,6 +12,7 @@ namespace MvvmNavigation
         public SecondPage()
         {
             this.InitializeComponent();
+
         }
 
         private void GoBackClick(object sender, RoutedEventArgs e)

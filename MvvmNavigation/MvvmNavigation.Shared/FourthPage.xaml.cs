@@ -1,16 +1,17 @@
 ﻿using BuildIt.Navigation;
 using MvvmNavigation.ViewModels;
-using Windows.UI.Xaml.Controls;
-
 
 namespace MvvmNavigation
 {
-    [ViewModel(typeof(FourthViewModel))]
-    public sealed partial class FourthPage : Page
+    [ViewModel(typeof(FourthViewModel), nameof(InitViewModel))]
+    public sealed partial class FourthPage
     {
+        partial void InitViewModel();
+        public FourthViewModel ViewModel => this.ViewModel(() => DataContext as FourthViewModel, () => InitViewModel());
+
         public FourthPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

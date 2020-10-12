@@ -6,11 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:vms="using:MvvmNavigation.ViewModels"
       mc:Ignorable="d"
-      DataContext="{x:Bind Converter={StaticResource PageViewModelConverter}}"
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock Text="{Binding Title}"
+        <TextBlock Text="{x:Bind ViewModel.Title}"
                    Margin="100"
                    FontSize="50"
                    HorizontalAlignment="Center" />
