@@ -10,9 +10,10 @@ namespace MvvmNavigation
 
 
 
-        [ApplicationService(nameof(RegisterEvents))]
+        [ApplicationService(nameof(RegisterEvents), nameof(RegisterServices))]
     public partial class MvvmApplicationServices:ApplicationService
     {
+        partial void RegisterServices(IServiceCollection serviceRegistrations);
         partial void RegisterEvents(NavigationEvents events);
 
 
@@ -20,30 +21,10 @@ namespace MvvmNavigation
         {
             base.InitializeApplicationServices(serviceRegistrations);
 
-           // HelloWorldGenerated.HelloWorld.SayHello(); 
-
             serviceRegistrations.AddSingleton<INavigationEvents>(sp =>
             {
                 var events = new NavigationEvents();
-
-                // Explicit creation of navigation message
-                //.Register<MainViewModel, EventHandler>
-                //    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a, (nav) => (s, ev) => nav(s.Complete(CompletionStates.One)));
-
-                // Implicit creation of completed navigation message
-                //.RegisterMessageWithParameter<MainViewModel, CompletedWithStatusMessage<CompletionStates>, CompletionStates>
-                //    ((v, a) => v.ViewModelAlsoDone += a, (v, a) => v.ViewModelAlsoDone -= a, CompletionStates.Two);
-
-                //// Implicit creation of close navigation message
-                //.RegisterMessage<SecondViewModel, CloseMessage>
-                //    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a)
-
-                //// Explicit creation of close navigation message
-                //.Register<ThirdViewModel, EventHandler>
-                //    ((v, a) => v.ViewModelDone += a, (v, a) => v.ViewModelDone -= a, (nav) => (s, ev) => nav(s.Close()));
-
                 RegisterEvents(events);
-
                 return events;
             });
 
@@ -75,10 +56,12 @@ namespace MvvmNavigation
                 return routes;
             });
 
-            serviceRegistrations.AddTransient<MainViewModel>();
-            serviceRegistrations.AddTransient<SecondViewModel>();
-            serviceRegistrations.AddTransient<ThirdViewModel>();
-            serviceRegistrations.AddTransient<FourthViewModel>();
+            //serviceRegistrations.AddTransient<MainViewModel>();
+            //serviceRegistrations.AddTransient<SecondViewModel>();
+            //serviceRegistrations.AddTransient<ThirdViewModel>();
+            //serviceRegistrations.AddTransient<FourthViewModel>();
+
+            RegisterServices(serviceRegistrations);
         }
     }
 

@@ -7,6 +7,7 @@ using System.Text;
 
 namespace MvvmNavigation.ViewModels
 {
+    [Register]
     public class ThirdViewModel: ObservableObject
     {
         [EventMessage(typeof(CloseMessage))]

@@ -5,13 +5,13 @@ using System.Text;
 namespace BuildIt.Navigation
 {
     [AttributeUsage(AttributeTargets.Event)]
-    public class EventMessageAttribute:Attribute
+    public class EventMessageAttribute : Attribute
     {
-        public Type MessageType { get;  }
+        public Type MessageType { get; }
 
         public Object MessageParameter { get; set; }
 
-        public EventMessageAttribute(Type messageType, object parameter=null)
+        public EventMessageAttribute(Type messageType, object parameter = null)
         {
             MessageType = messageType;
             MessageParameter = parameter;
@@ -24,7 +24,7 @@ namespace BuildIt.Navigation
         public Type ViewModelType { get; }
         public string InitMethodName { get; }
 
-        public ViewModelAttribute(Type viewModelType, string initMethod=null)
+        public ViewModelAttribute(Type viewModelType, string initMethod = null)
         {
             ViewModelType = viewModelType;
             InitMethodName = initMethod;
@@ -34,11 +34,13 @@ namespace BuildIt.Navigation
     [AttributeUsage(AttributeTargets.Class)]
     public class ApplicationServiceAttribute : Attribute
     {
-        public string RegistrationMethod { get;  }
+        public string RegistrationMethod { get; }
+        public string RegistrationServicesMethod { get; }
 
-        public ApplicationServiceAttribute(string registrationMethod)
+        public ApplicationServiceAttribute(string registrationMethod, string serviceRegistrationMethod)
         {
             RegistrationMethod = registrationMethod;
+            RegistrationServicesMethod = serviceRegistrationMethod;
         }
     }
 
@@ -51,5 +53,10 @@ namespace BuildIt.Navigation
         {
             RegistrationMappingMethod = registrationMethod;
         }
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class RegisterAttribute : Attribute
+    {
     }
 }

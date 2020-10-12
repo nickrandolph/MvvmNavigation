@@ -22,7 +22,7 @@ namespace BuildIt.Navigation.Generator
                 // the generator infrastructure will create a receiver and populate it
                 // we can retrieve the populated instance via the context
                 var syntaxReceiver = context.SyntaxReceiver as SyntaxReceiver;
-                if (string.IsNullOrWhiteSpace( syntaxReceiver?.AppServiceTypeName))
+                if (string.IsNullOrWhiteSpace(syntaxReceiver?.AppServiceTypeName))
                 {
                     return;
                 }
@@ -119,9 +119,25 @@ namespace {syntaxReceiver.AppServiceNamespace}
 {{
     public partial class {syntaxReceiver.AppServiceTypeName}
     {{
-        
 
-        partial void {syntaxReceiver.RegistrationPartialMethodName}(NavigationEvents events)
+        partial void {syntaxReceiver.RegistrationServicesPartialMethodName}(IServiceCollection serviceRegistrations)
+        {{
+");
+
+                foreach (var reg in syntaxReceiver.AutoRegistrations)
+                {
+                    sourceBuilder.AppendLine(
+$@"
+     serviceRegistrations.AddTransient<{reg.ViewModelTypeName}>();
+");
+                }
+
+                // finish creating the source to inject
+                sourceBuilder.Append($@"
+        }}
+
+
+                partial void {syntaxReceiver.RegistrationPartialMethodName}(NavigationEvents events)
         {{
 ");
 
@@ -156,7 +172,7 @@ namespace {syntaxReceiver.AppServiceNamespace}
                 // inject the created source into the users compilation
                 context.AddSource("MvvmApplicationServices.generated.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
@@ -180,12 +196,17 @@ namespace {syntaxReceiver.AppServiceNamespace}
             public string AppServiceNamespace { get; set; }// => "MvvmNavigation";
 
             public string RegistrationPartialMethodName { get; set; }// = "RegisterEvents";
+            public string RegistrationServicesPartialMethodName { get; set; }// = "RegisterEvents";
 
-            public string Namespaces => string.Join(Environment.NewLine, (from reg in Registrations
-                                                                          where reg.ParameterNamespace!=null
-                                                                           select reg.ParameterNamespace)
+            public string Namespaces => string.Join(Environment.NewLine,
+                                    (from reg in Registrations
+                                    where reg.ParameterNamespace != null
+                                    select reg.ParameterNamespace)
                                         .Union(from reg in Registrations
-                                               where reg.ViewModelNamespace!=null
+                                               where reg.ViewModelNamespace != null
+                                               select reg.ViewModelNamespace)
+                                        .Union(from reg in AutoRegistrations
+                                               where reg.ViewModelNamespace != null
                                                select reg.ViewModelNamespace)
                                         .Distinct()
                                         .OrderBy(x => x)
@@ -193,6 +214,8 @@ namespace {syntaxReceiver.AppServiceNamespace}
 
 
             public IList<EventRegistration> Registrations { get; } = new List<EventRegistration>();
+
+            public IList<ViewModelRegistration> AutoRegistrations { get; } = new List<ViewModelRegistration>();
 
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
             {
@@ -203,6 +226,7 @@ namespace {syntaxReceiver.AppServiceNamespace}
                     if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax)
                     {
                         var classAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax)?.Identifier.Text + "Attribute" == typeof(ApplicationServiceAttribute).Name);
+                        var regAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax)?.Identifier.Text + "Attribute" == typeof(RegisterAttribute).Name);
                         if (classAttribute != null)
                         {
                             AppServiceTypeName = classDeclarationSyntax.Identifier.ValueText;
@@ -222,6 +246,26 @@ namespace {syntaxReceiver.AppServiceNamespace}
                                                 .FirstOrDefault() as IdentifierNameSyntax;
                             RegistrationPartialMethodName = identifier.Identifier.ValueText;
 
+                            var secondArgument = classAttribute.ArgumentList.Arguments.Skip(1).FirstOrDefault();
+                            identifier = secondArgument.Expression
+                                                .DescendantNodes()
+                                                .Where(x => x.Kind() == SyntaxKind.IdentifierName)
+                                                .Skip(1)
+                                                .FirstOrDefault() as IdentifierNameSyntax;
+                            RegistrationServicesPartialMethodName = identifier.Identifier.ValueText;
+                            
+
+                        }
+                        else if (regAttribute != null)
+                        {
+                            var namespaceSyntax = classDeclarationSyntax.Parent as NamespaceDeclarationSyntax;
+                            AutoRegistrations.Add(new ViewModelRegistration
+                            {
+                                ViewModelTypeName = classDeclarationSyntax.Identifier.ValueText,
+                                ViewModelNamespace = namespaceSyntax.Name.ToString()
+
+                            });
+
                         }
                     }
 
@@ -231,9 +275,10 @@ namespace {syntaxReceiver.AppServiceNamespace}
                         if (messageAttribute != null)
                         {
                             var eventName = eventDeclarationSyntax.Declaration.Variables.FirstOrDefault().Identifier.ValueText;
-                            Registrations.Add(new EventRegistration() { 
+                            Registrations.Add(new EventRegistration()
+                            {
                                 EventSyntax = eventDeclarationSyntax,
-                            EventName = eventName
+                                EventName = eventName
                             });
                             //SemanticModel model = compilation.GetSemanticModel(syntaxTree);
                             //ISymbol symbol = model.GetSymbolInfo(syntaxNode).Symbol;
@@ -250,17 +295,26 @@ namespace {syntaxReceiver.AppServiceNamespace}
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
 
                 }
             }
+
+
+
         }
 
-        private class EventRegistration
+
+        private class ViewModelRegistration
         {
             public string ViewModelTypeName { get; set; }
             public string ViewModelNamespace { get; set; }
+
+        }
+
+        private class EventRegistration : ViewModelRegistration
+        {
             public string MessageTypeName { get; set; }
             //public string MessageNamespace { get; set; }
             public string EventName { get; set; }
@@ -269,6 +323,7 @@ namespace {syntaxReceiver.AppServiceNamespace}
             public string ParameterValueAsString { get; set; }
 
             public EventFieldDeclarationSyntax EventSyntax { get; set; }
+
         }
     }
 }

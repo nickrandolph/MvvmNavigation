@@ -5,6 +5,7 @@ using System;
 
 namespace MvvmNavigation.ViewModels
 {
+    [Register]
     public class SecondViewModel : ObservableObject
     {
         private int count;
