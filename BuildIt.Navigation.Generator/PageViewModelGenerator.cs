@@ -174,7 +174,7 @@ namespace {reg.PageNamespace}
 
                     if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax)
                     {
-                        var classAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax)?.Identifier.Text + "Attribute" == typeof(ApplicationAttribute).Name);
+                        var classAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax)?.Identifier.Text + "Attribute" == typeof(ViewModelMappingRegisterAttribute).Name);
                         var viewModelClassAttribute = classDeclarationSyntax.AttributeLists.FirstOrDefault()?.Attributes.FirstOrDefault(attrib => (attrib.Name as IdentifierNameSyntax)?.Identifier.Text + "Attribute" == typeof(ViewModelAttribute).Name);
                         if (classAttribute != null)
                         {

@@ -1,10 +1,7 @@
 ﻿using BuildIt.Navigation;
-using BuildIt.Navigation.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MvvmNavigation.Messages;
 using MvvmNavigation.UI;
-using MvvmNavigation.ViewModels;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -14,7 +11,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace MvvmNavigation
 {
-    [Application(nameof(RegistarViewModelMappings))]
+    [ViewModelMappingRegister(nameof(RegistarViewModelMappings))]
     sealed partial class App : Application, INavigationApplication
     {
         /// <summary>

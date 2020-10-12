@@ -2,7 +2,7 @@
 
 namespace MvvmNavigation.UI
 {
-    [Application(nameof(RegistarViewModelMappings))]
+    [ViewModelMappingRegister(nameof(RegistarViewModelMappings))]
 
     public partial class UIMapping
     {

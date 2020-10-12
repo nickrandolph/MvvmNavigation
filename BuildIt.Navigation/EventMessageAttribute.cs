@@ -43,11 +43,11 @@ namespace BuildIt.Navigation
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class ApplicationAttribute : Attribute
+    public class ViewModelMappingRegisterAttribute : Attribute
     {
         public string RegistrationMappingMethod { get; }
 
-        public ApplicationAttribute(string registrationMethod)
+        public ViewModelMappingRegisterAttribute(string registrationMethod)
         {
             RegistrationMappingMethod = registrationMethod;
         }
