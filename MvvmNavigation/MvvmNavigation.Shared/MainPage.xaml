@@ -47,6 +47,13 @@
                     </Interactions:EventTriggerBehavior>
                 </Interactivity:Interaction.Behaviors>
             </Button>
+            <Button Content="Go To Page 5">
+                <Interactivity:Interaction.Behaviors>
+                    <Interactions:EventTriggerBehavior EventName="Click">
+                        <builditbehaviors:NavigationMessageAction MessageType="localmessages:PleadTheFifthMessage" />
+                    </Interactions:EventTriggerBehavior>
+                </Interactivity:Interaction.Behaviors>
+            </Button>
         </StackPanel>
     </Grid>
 </Page>

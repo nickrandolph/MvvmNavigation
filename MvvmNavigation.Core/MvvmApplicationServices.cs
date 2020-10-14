@@ -31,6 +31,7 @@ namespace MvvmNavigation
             serviceRegistrations.AddSingleton<INavigationMessageRoutes>(sp =>
             {
                 var routes = new NavigationMessageRoutes()
+                    .RegisterNavigate<MainViewModel, PleadTheFifthMessage, FifthViewModel>()
                     .RegisterNavigate<MainViewModel, CompletedMessage, SecondViewModel>()
                     .Register<MainViewModel, CompletedWithStatusMessage<CompletionStates>>((vm, msg, nav) =>
                     {
@@ -56,10 +57,6 @@ namespace MvvmNavigation
                 return routes;
             });
 
-            //serviceRegistrations.AddTransient<MainViewModel>();
-            //serviceRegistrations.AddTransient<SecondViewModel>();
-            //serviceRegistrations.AddTransient<ThirdViewModel>();
-            //serviceRegistrations.AddTransient<FourthViewModel>();
 
             RegisterServices(serviceRegistrations);
         }
